@@ -57,7 +57,22 @@ impl Input {
         for (idx, point) in course.clone()[0..course.len() - 101].iter().enumerate() {
             for other_point in course[idx + 101..].iter() {
                 let d = distance(*point, *other_point);
-                if d <= 2{
+                if d <= 2 {
+                    count += 1;
+                }
+            }
+        }
+        count
+    }
+
+    pub fn every_cheat2(&self) -> u64 {
+        let mut count = 0;
+        let course = self.course();
+        for (idx, point) in course.clone()[0..course.len() - 101].iter().enumerate() {
+            for (id2, other_point) in course[idx + 101..].iter().enumerate() {
+                let original_distance = id2 + 101;
+                let d = distance(*point, *other_point);
+                if d <= 20 && original_distance - d >= 100 {
                     count += 1;
                 }
             }
@@ -79,4 +94,9 @@ pub fn distance((ax, ay): (usize, usize), (bx, by): (usize, usize)) -> usize {
 #[aoc(day20, part1)]
 pub fn solve_part1(input: &Input) -> u64 {
     input.every_cheat()
+}
+
+#[aoc(day20, part2)]
+pub fn solve_part2(input: &Input) -> u64 {
+    input.every_cheat2()
 }
