@@ -148,6 +148,25 @@ pub fn solve_part1(input: &[(i32, i32)]) -> u32 {
     space.find_path()
 }
 
+#[aoc(day18, part2)]
+pub fn solve_part2(input: &[(i32, i32)]) -> String {
+    let mut result = String::new();
+    for i in 1025..input.len() {
+        let space = MemorySpace {
+            corrupted: HashSet::from_iter(input[0..i].iter().map(|x| *x)),
+            start: (0, 0),
+            end: (70, 70),
+            height: 71,
+            width: 71,
+        };
+        if space.find_path() == u32::MAX {
+            result = format!("{},{}", input[i - 1].0, input[i - 1].1);
+            break;
+        }
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -181,12 +200,54 @@ mod tests {
         1,6
         2,0";
         let space = MemorySpace {
-            corrupted: HashSet::from_iter(input_generator(input).iter().map(|x| *x)),
+            corrupted: HashSet::from_iter(input_generator(input)[0..12].iter().map(|x| *x)),
             start: (0, 0),
             end: (6, 6),
             height: 7,
             width: 7,
         };
         assert_eq!(space.find_path(), 22);
+    }
+    #[test]
+    fn test_part2() {
+        let input = "5,4
+            4,2
+            4,5
+            3,0
+            2,1
+            6,3
+            2,4
+            1,5
+            0,6
+            3,3
+            2,6
+            5,1
+            1,2
+            5,5
+            2,5
+            6,5
+            1,4
+            0,4
+            6,4
+            1,1
+            6,1
+            1,0
+            0,5
+            1,6
+            2,0";
+        let corruptions = input_generator(input);
+        for i in 12..corruptions.len() {
+            let space = MemorySpace {
+                corrupted: HashSet::from_iter(corruptions[0..i].iter().map(|x| *x)),
+                start: (0, 0),
+                end: (6, 6),
+                height: 7,
+                width: 7,
+            };
+            if space.find_path() == u32::MAX {
+                assert_eq!(corruptions[i - 1], (6, 1));
+                break;
+            }
+        }
     }
 }
