@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 #[aoc_generator(day23)]
 pub fn input_generator(input: &str) -> Vec<(String, String)> {
@@ -60,6 +60,62 @@ pub fn solve_part1(input: &[(String, String)]) -> u64 {
         }
     }
     triplets.len().try_into().unwrap()
+}
+
+pub fn group(k: String, n: HashMap<String, HashSet<String>>) -> HashSet<String> {
+    let mut result = HashSet::new();
+    let mut last_total = 0;
+    let mut queue = Vec::new();
+    queue.push(&k);
+    while let Some(v) = queue.pop() {
+        let new = n.get(v).unwrap();
+        result.extend(new.clone());
+        queue.extend(new);
+        if result.len() == last_total {
+            break;
+        }
+        last_total = result.len();
+    }
+    result
+}
+
+#[aoc(day23, part2)]
+pub fn solve_part2(input: &[(String, String)]) -> String {
+    let mut computers = HashSet::<String>::new();
+    let mut connections = HashSet::<(String, String)>::new();
+    for (a, b) in input {
+        computers.insert(a.to_owned());
+        computers.insert(b.to_owned());
+        connections.insert((a.to_owned(), b.to_owned()));
+        connections.insert((b.to_owned(), a.to_owned()));
+    }
+
+    let mut seen_groups = Vec::<Vec<String>>::new();
+
+    let mut computers: Vec<String> = computers.into_iter().collect();
+    computers.sort_unstable();
+    let mut computers: VecDeque<String> = computers.into_iter().collect();
+
+    while let Some(computer) = computers.pop_front() {
+        let mut curr_group = vec![computer];
+        'outer: loop {
+            for (idx, other_computer) in computers.iter().enumerate() {
+                if curr_group.iter().all(|curr_computer| {
+                    connections.contains(&(curr_computer.to_owned(), other_computer.to_owned()))
+                }) {
+                    curr_group.push(computers.remove(idx).unwrap());
+                    continue 'outer;
+                }
+            }
+            break;
+        }
+        seen_groups.push(curr_group);
+    }
+    seen_groups.sort_by_key(|x| x.len());
+
+    let mut x = Vec::from_iter(seen_groups.last().unwrap().iter().map(|x| x.clone()));
+    x.sort();
+    return x.join(",");
 }
 
 #[cfg(test)]
